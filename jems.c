@@ -48,6 +48,7 @@ static jems_t *push_level(jems_t *jems, bool is_object);
 static jems_t *pop_level(jems_t *jems);
 static jems_t *emit_char(jems_t *jems, char ch);
 static jems_t *emit_string(jems_t *jems, const char *s);
+static jems_t *emit_quoted_string(jems_t *jems, const char *s);
 static jems_t *commify(jems_t *jems);
 static jems_level_t *level_ref(jems_t *jems);
 
@@ -116,7 +117,7 @@ jems_t *jems_integer(jems_t *jems, int64_t value) {
 jems_t *jems_string(jems_t *jems, const char *string) {
     commify(jems);
     emit_char(jems, '"');
-    emit_string(jems, string);
+    emit_quoted_string(jems, string);
     return emit_char(jems, '"');
 }
 
@@ -177,6 +178,22 @@ static jems_t *emit_string(jems_t *jems, const char *s) {
       emit_char(jems, *s++);
     }
     return jems;
+}
+
+static jems_t *emit_quoted_string(jems_t *jems, const char *s) {
+  while(*s) {
+    if (*s < 0x20) {
+      char buf[7];
+      sprintf(buf, "\\u%04x", *s++);
+      emit_string(jems, buf);
+    } else {
+      if ((*s == '\\') || (*s == '"')) {
+        emit_char(jems, '\\');
+      }
+      emit_char(jems, *s++);
+    }
+  }
+  return jems;
 }
 
 static jems_t *commify(jems_t *jems) {

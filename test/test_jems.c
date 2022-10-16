@@ -166,6 +166,19 @@ int main(void) {
     ASSERT(jems_item_count(&s_jems) == 1);
     ASSERT(test_result("null"));
 
+    // Test string escaping (tip of the hat to Latex95
+    test_reset();
+    jems_string(&s_jems, "say \"hey\"!");
+    ASSERT(test_result("\"say \\\"hey\\\"!\""));
+
+    test_reset();
+    jems_string(&s_jems, "forward / and back \\ slash");
+    ASSERT(test_result("\"forward / and back \\\\ slash\""));
+
+    test_reset();
+    jems_string(&s_jems, "newline \n and return \r oh my");
+    ASSERT(test_result("\"newline \\u000a and return \\u000d oh my\""));
+
     test_reset();
     ASSERT(jems_curr_level(&s_jems) == 0);
     ASSERT(jems_item_count(&s_jems) == 0);
@@ -227,6 +240,7 @@ static void test_writer(char c) {
 static bool test_result(const char *expected) {
     s_test_string[s_test_idx] = '\0';
     printf("\nrendered %s", s_test_string);
+    // printf("\nexpected %s", expected);
     return strcmp(s_test_string, expected) == 0;
 }
 
