@@ -30,6 +30,7 @@
 
 #include "jems.h"
 
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -97,11 +98,11 @@ jems_t *jems_array_close(jems_t *jems) {
 jems_t *jems_number(jems_t *jems, double value) {
     char buf[22];
     int64_t i = value;
-    // if number can be represented exactly as an int, print as int
     if ((double)i == value) {
-          snprintf(buf, sizeof(buf), "%ld", i);
+        // if number can be represented exactly as an int, print as int
+        snprintf(buf, sizeof(buf), "%" PRId64, i);
     } else {
-          snprintf(buf, sizeof(buf), "%lf", value);
+        snprintf(buf, sizeof(buf), "%lf", value);
     }
     commify(jems);
     return emit_string(jems, buf);
@@ -109,7 +110,7 @@ jems_t *jems_number(jems_t *jems, double value) {
 
 jems_t *jems_integer(jems_t *jems, int64_t value) {
     char buf[22]; // 20 digits, 1 sign, 1 null
-    snprintf(buf, sizeof(buf), "%ld", value);
+    snprintf(buf, sizeof(buf), "%" PRId64, value);
     commify(jems);
     return emit_string(jems, buf);
 }
