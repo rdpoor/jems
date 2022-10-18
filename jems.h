@@ -54,13 +54,14 @@ typedef struct {
 } jems_level_t;
 
 // Signature for the jems_emit function
-typedef void (*jems_writer_fn)(char ch);
+typedef void (*jems_writer_fn)(char ch, uintptr_t arg);
 
 typedef struct _jems {
   jems_level_t *levels;
   size_t max_level;
   size_t curr_level;
   jems_writer_fn writer;
+  uintptr_t arg;
 } jems_t;
 
 // *****************************************************************************
@@ -83,11 +84,13 @@ typedef struct _jems {
  * @param level An array of jems_level objects.
  * @param max_level The number of elements in @ref level.
  * @param writer A function that takes one char arg and renders it.
+ * @param arg User-supplied argument passed to the writer function.
  */
 jems_t *jems_init(jems_t *jems,
                   jems_level_t *levels,
                   size_t max_level,
-                  jems_writer_fn writer);
+                  jems_writer_fn writer,
+                  uintptr_t arg);
 
 /**
  * @brief Reset to top level.

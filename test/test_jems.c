@@ -76,7 +76,7 @@ static void test_reset(void);
 /**
  * @brief Write one character to the test string.
  */
-static void test_writer(char c);
+static void test_writer(char c, uintptr_t arg);
 
 /**
  * @brief Return true if the test string equals the expected string.
@@ -89,7 +89,7 @@ static bool test_result(const char *expected);
 int main(void) {
     printf("Starting test_jems...\n");
 
-    ASSERT(jems_init(&s_jems, s_levels, MAX_LEVEL, test_writer) == &s_jems);
+    ASSERT(jems_init(&s_jems, s_levels, MAX_LEVEL, test_writer, 0) == &s_jems);
     ASSERT(jems_reset(&s_jems) == &s_jems);
     ASSERT(jems_curr_level(&s_jems) == 0);
     ASSERT(jems_item_count(&s_jems) == 0);
@@ -227,11 +227,12 @@ static void assert(bool expr, const char *str, const char *file, int line) {
 }
 
 static void test_reset(void) {
-    jems_init(&s_jems, s_levels, MAX_LEVEL, test_writer);
+    jems_init(&s_jems, s_levels, MAX_LEVEL, test_writer, 0);
     s_test_idx = 0;
 }
 
-static void test_writer(char c) {
+static void test_writer(char c, uintptr_t arg) {
+    (void)arg;
     if (s_test_idx < sizeof(s_test_string)) {
         s_test_string[s_test_idx++] = c;
     }

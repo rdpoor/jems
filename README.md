@@ -27,15 +27,20 @@ example:
 
 ```
 #include "jems.h"
+#include <stdint.h>
 #include <stdio.h>
 
-#defne MAX_LEVEL 10  // how deeply nested the JSON structures can get
+#define MAX_LEVEL 10  // how deeply nested the JSON structures can get
 static jems_level_t jems_levels[MAX_LEVEL];
 static jems_t jems;
 
+static void write_char(char ch, uintptr_t arg) {
+  fputc(ch, (FILE *)arg);
+}
+
 int main(void) {
-    // initalize the jems object, using putc() as the method for writing chars.
-    jems_init(&jems, jems_levels, MAX_LEVEL, putc);
+    // initalize the jems object, using fputc() as the method for writing chars.
+    jems_init(&jems, jems_levels, MAX_LEVEL, write_char, (uintptr_t)stdout);
 
     jems_object_open(&jems);       // start an object.
     jems_string(&jems, "colors");  // first object key is "colors"

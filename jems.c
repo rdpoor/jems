@@ -59,10 +59,12 @@ static jems_level_t *level_ref(jems_t *jems);
 jems_t *jems_init(jems_t *jems,
                   jems_level_t *levels,
                   size_t max_level,
-                  jems_writer_fn writer) {
+                  jems_writer_fn writer,
+                  uintptr_t arg) {
     jems->levels = levels;
     jems->max_level = max_level;
     jems->writer = writer;
+    jems->arg = arg;
     return jems_reset(jems);
 }
 
@@ -170,7 +172,7 @@ static jems_t *pop_level(jems_t *jems) {
 }
 
 static jems_t *emit_char(jems_t *jems, char ch) {
-    jems->writer(ch);
+    jems->writer(ch, jems->arg);
     return jems;
 }
 
