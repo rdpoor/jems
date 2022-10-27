@@ -49,7 +49,9 @@ static jems_t *push_level(jems_t *jems, bool is_object);
 static jems_t *pop_level(jems_t *jems);
 static jems_t *emit_char(jems_t *jems, char ch);
 static jems_t *emit_string(jems_t *jems, const char *s);
+static jems_t *emit_escaped_char(jems_t *jems, char ch);
 static jems_t *emit_quoted_string(jems_t *jems, const char *s);
+static jems_t *emit_quoted_string_span(jems_t *jems, const char *s, size_t len);
 static jems_t *commify(jems_t *jems);
 static jems_level_t *level_ref(jems_t *jems);
 
@@ -124,6 +126,13 @@ jems_t *jems_string(jems_t *jems, const char *string) {
     return emit_char(jems, '"');
 }
 
+jems_t *jems_string_span(jems_t *jems, const char *string, size_t len) {
+    commify(jems);
+    emit_char(jems, '"');
+    emit_quoted_string_span(jems, string, len);
+    return emit_char(jems, '"');
+}
+
 jems_t *jems_bool(jems_t *jems, bool boolean) {
     commify(jems);
     return emit_string(jems, boolean ? "true" : "false");
@@ -183,18 +192,31 @@ static jems_t *emit_string(jems_t *jems, const char *s) {
     return jems;
 }
 
-static jems_t *emit_quoted_string(jems_t *jems, const char *s) {
-  while(*s) {
-    if (*s < 0x20) {
+static jems_t *emit_escaped_char(jems_t *jems, char ch) {
+    if (ch < 0x20) {
       char buf[7];
-      sprintf(buf, "\\u%04x", *s++);
+      sprintf(buf, "\\u%04x", ch);
       emit_string(jems, buf);
     } else {
-      if ((*s == '\\') || (*s == '"')) {
+      if ((ch == '\\') || (ch == '"')) {
         emit_char(jems, '\\');
       }
-      emit_char(jems, *s++);
+      emit_char(jems, ch);
     }
+
+    return jems;
+}
+
+static jems_t *emit_quoted_string(jems_t *jems, const char *s) {
+  while(*s) {
+      emit_escaped_char(jems, *s++);
+  }
+  return jems;
+}
+
+static jems_t *emit_quoted_string_span(jems_t *jems, const char *s, size_t len) {
+  for(size_t i = 0; i < len; i++) {
+      emit_escaped_char(jems, s[i]);
   }
   return jems;
 }

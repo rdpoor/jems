@@ -136,6 +136,12 @@ jems_t *jems_integer(jems_t *jems, int64_t value);
 jems_t *jems_string(jems_t *jems, const char *string);
 
 /**
+ * @brief Emit a string of known length in JSON format.
+ *        Useful for strings which are not null-terminated.
+ */
+jems_t *jems_string_span(jems_t *jems, const char *string, size_t len);
+
+/**
  * @brief Emit a boolean (true or false) in JSON format.
  */
 jems_t *jems_bool(jems_t *jems, bool boolean);

@@ -180,6 +180,21 @@ int main(void) {
     ASSERT(test_result("\"newline \\u000a and return \\u000d oh my\""));
 
     test_reset();
+    char str_span[] = "foo bar baz";
+    jems_string_span(&s_jems, str_span, sizeof(str_span) - 1);
+    ASSERT(test_result("\"foo bar baz\""));
+
+    test_reset();
+    char str_span_with_quotes[] = "say \"foo bar baz\"!";
+    jems_string_span(&s_jems, str_span_with_quotes, sizeof(str_span_with_quotes) - 1);
+    ASSERT(test_result("\"say \\\"foo bar baz\\\"!\""));
+
+    test_reset();
+    char str_span_with_escapes[] = "newline \n and return \r oh my";
+    jems_string_span(&s_jems, str_span_with_escapes, sizeof(str_span_with_escapes) - 1);
+    ASSERT(test_result("\"newline \\u000a and return \\u000d oh my\""));
+
+    test_reset();
     ASSERT(jems_curr_level(&s_jems) == 0);
     ASSERT(jems_item_count(&s_jems) == 0);
     jems_object_open(&s_jems);
