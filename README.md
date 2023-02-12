@@ -10,7 +10,7 @@ systems.
 a buffer, string or stream.  Specifically designed for embedded systems, `jems`
 is:
 * **compact**: one source file and one header file
-* **portable**: written in pure C
+* **portable**: written in pure C (with C++ compatible headers)
 * **deterministic**: `jems` uses user-provided data structures and never calls
 `malloc()`.
 * **yours to use**: `jems` is covered under the permissive MIT License.
