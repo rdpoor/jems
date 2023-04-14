@@ -166,7 +166,7 @@ int main(void) {
     ASSERT(jems_item_count(&s_jems) == 1);
     ASSERT(test_result("null"));
 
-    // Test string escaping (tip of the hat to Latex95
+    // Test string escaping (tip of the hat to Latex95)
     test_reset();
     jems_string(&s_jems, "say \"hey\"!");
     ASSERT(test_result("\"say \\\"hey\\\"!\""));
@@ -178,6 +178,84 @@ int main(void) {
     test_reset();
     jems_string(&s_jems, "newline \n and return \r oh my");
     ASSERT(test_result("\"newline \\u000a and return \\u000d oh my\""));
+
+    // test \uxxxx style encoding
+    do {
+        test_reset();
+        const char str[] = {0x01, 0x20, 0x7e, 0x7f, 0x80, 0x00};
+        jems_string(&s_jems, str);
+        ASSERT(test_result("\"\\u0001 ~\\u007f\\u0080\""));
+    } while (false);
+
+    do {
+        test_reset();
+        const char str[] = {0x00, 0x01, 0x20, 0x7e, 0x7f, 0x80};
+        jems_bytes(&s_jems, (uint8_t *)str, sizeof(str));
+        ASSERT(test_result("\"\\u0000\\u0001 ~\\u007f\\u0080\""));
+    } while (false);
+
+    // key:value pairs
+    test_reset();
+    jems_object_open(&s_jems);
+    jems_key_object_open(&s_jems, "key");
+    jems_object_close(&s_jems);
+    jems_object_close(&s_jems);
+    ASSERT(test_result("{\"key\":{}}"));
+
+    test_reset();
+    jems_object_open(&s_jems);
+    jems_key_array_open(&s_jems, "key");
+    jems_array_close(&s_jems);
+    jems_object_close(&s_jems);
+    ASSERT(test_result("{\"key\":[]}"));
+
+    test_reset();
+    jems_object_open(&s_jems);
+    jems_key_number(&s_jems, "key", 1.234);
+    jems_object_close(&s_jems);
+    ASSERT(test_result("{\"key\":1.234000}"));
+
+    test_reset();
+    jems_object_open(&s_jems);
+    jems_key_integer(&s_jems, "key", 1234);
+    jems_object_close(&s_jems);
+    ASSERT(test_result("{\"key\":1234}"));
+
+    test_reset();
+    jems_object_open(&s_jems);
+    jems_key_string(&s_jems, "key", "value");
+    jems_object_close(&s_jems);
+    ASSERT(test_result("{\"key\":\"value\"}"));
+
+    test_reset();
+    jems_object_open(&s_jems);
+    jems_key_bytes(&s_jems, "key", (uint8_t *)"value", strlen("value"));
+    jems_object_close(&s_jems);
+    ASSERT(test_result("{\"key\":\"value\"}"));
+
+    test_reset();
+    jems_object_open(&s_jems);
+    jems_key_bool(&s_jems, "key", true);
+    jems_object_close(&s_jems);
+    ASSERT(test_result("{\"key\":true}"));
+
+    test_reset();
+    jems_object_open(&s_jems);
+    jems_key_true(&s_jems, "key");
+    jems_object_close(&s_jems);
+    ASSERT(test_result("{\"key\":true}"));
+
+    test_reset();
+    jems_object_open(&s_jems);
+    jems_key_false(&s_jems, "key");
+    jems_object_close(&s_jems);
+    ASSERT(test_result("{\"key\":false}"));
+
+    test_reset();
+    jems_object_open(&s_jems);
+    jems_key_null(&s_jems, "key");
+    jems_object_close(&s_jems);
+    ASSERT(test_result("{\"key\":null}"));
 
     test_reset();
     ASSERT(jems_curr_level(&s_jems) == 0);

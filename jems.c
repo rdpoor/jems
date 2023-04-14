@@ -48,8 +48,10 @@
 static jems_t *push_level(jems_t *jems, bool is_object);
 static jems_t *pop_level(jems_t *jems);
 static jems_t *emit_char(jems_t *jems, char ch);
+static jems_t *emit_quoted_byte(jems_t *jems, uint8_t byte);
 static jems_t *emit_string(jems_t *jems, const char *s);
 static jems_t *emit_quoted_string(jems_t *jems, const char *s);
+static jems_t *emit_quoted_bytes(jems_t *jems, const uint8_t *bytes, size_t len);
 static jems_t *commify(jems_t *jems);
 static jems_level_t *level_ref(jems_t *jems);
 
@@ -124,6 +126,13 @@ jems_t *jems_string(jems_t *jems, const char *string) {
     return emit_char(jems, '"');
 }
 
+jems_t *jems_bytes(jems_t *jems, const uint8_t *bytes, size_t length) {
+    commify(jems);
+    emit_char(jems, '"');
+    emit_quoted_bytes(jems, bytes, length);
+    return emit_char(jems, '"');
+}
+
 jems_t *jems_bool(jems_t *jems, bool boolean) {
     commify(jems);
     return emit_string(jems, boolean ? "true" : "false");
@@ -143,6 +152,50 @@ jems_t *jems_null(jems_t *jems) {
     commify(jems);
     return emit_string(jems, "null");
 }
+
+// ***************
+// key:value pairs
+
+jems_t *jems_key_object_open(jems_t *jems, const char *key) {
+    return jems_object_open(jems_string(jems, key));
+}
+
+jems_t *jems_key_array_open(jems_t *jems, const char *key) {
+    return jems_array_open(jems_string(jems, key));
+}
+
+jems_t *jems_key_number(jems_t *jems, const char *key, double value) {
+    return jems_number(jems_string(jems, key), value);
+}
+
+jems_t *jems_key_integer(jems_t *jems, const char *key, int64_t value) {
+    return jems_integer(jems_string(jems, key), value);
+}
+
+jems_t *jems_key_string(jems_t *jems, const char *key, const char *string) {
+    return jems_string(jems_string(jems, key), string);
+}
+
+jems_t *jems_key_bytes(jems_t *jems, const char *key, const uint8_t *bytes, size_t length) {
+    return jems_bytes(jems_string(jems, key), bytes, length);
+}
+
+jems_t *jems_key_bool(jems_t *jems, const char *key, bool boolean) {
+    return jems_bool(jems_string(jems, key), boolean);
+}
+
+jems_t *jems_key_true(jems_t *jems, const char *key) {
+    return jems_true(jems_string(jems, key));
+}
+
+jems_t *jems_key_false(jems_t *jems, const char *key) {
+    return jems_false(jems_string(jems, key));
+}
+
+jems_t *jems_key_null(jems_t *jems, const char *key) {
+    return jems_null(jems_string(jems, key));
+}
+
 
 size_t jems_curr_level(jems_t *jems) {
     return jems->curr_level;
@@ -176,6 +229,20 @@ static jems_t *emit_char(jems_t *jems, char ch) {
     return jems;
 }
 
+static jems_t *emit_quoted_byte(jems_t *jems, uint8_t byte) {
+    if ((byte < 0x20) || (byte >= 127)) {
+        char buf[7];
+        sprintf(buf, "\\u%04x", byte);
+        emit_string(jems, buf);
+    } else {
+        if ((byte == '\\') || (byte == '"')) {
+            emit_char(jems, '\\');
+        }
+        emit_char(jems, (char)byte);
+    }
+    return jems;
+}
+
 static jems_t *emit_string(jems_t *jems, const char *s) {
     while(*s) {
       emit_char(jems, *s++);
@@ -184,19 +251,18 @@ static jems_t *emit_string(jems_t *jems, const char *s) {
 }
 
 static jems_t *emit_quoted_string(jems_t *jems, const char *s) {
-  while(*s) {
-    if (*s < 0x20) {
-      char buf[7];
-      sprintf(buf, "\\u%04x", *s++);
-      emit_string(jems, buf);
-    } else {
-      if ((*s == '\\') || (*s == '"')) {
-        emit_char(jems, '\\');
-      }
-      emit_char(jems, *s++);
+    while(*s) {
+        emit_quoted_byte(jems, (uint8_t)(*s++));
     }
-  }
-  return jems;
+    return jems;
+}
+
+static jems_t *emit_quoted_bytes(jems_t *jems, const uint8_t *bytes, size_t len) {
+    for (int i=0; i<len; i++) {
+        const uint8_t b = bytes[i];
+        emit_quoted_byte(jems, b);
+    }
+    return jems;
 }
 
 static jems_t *commify(jems_t *jems) {

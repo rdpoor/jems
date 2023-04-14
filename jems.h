@@ -131,9 +131,14 @@ jems_t *jems_number(jems_t *jems, double value);
 jems_t *jems_integer(jems_t *jems, int64_t value);
 
 /**
- * @brief Emit a string in JSON format.
+ * @brief Emit a null-terminated string in JSON format, quoting as needed.
  */
 jems_t *jems_string(jems_t *jems, const char *string);
+
+/**
+ * @brief Emit length bytes as a string in JSON format, quoting as needed.
+ */
+jems_t *jems_bytes(jems_t *jems, const uint8_t *bytes, size_t length);
 
 /**
  * @brief Emit a boolean (true or false) in JSON format.
@@ -154,6 +159,59 @@ jems_t *jems_false(jems_t *jems);
  * @brief Emit a null in JSON format.
  */
 jems_t *jems_null(jems_t *jems);
+
+/**
+ * @brief Emit a string key followed by an open object.
+ */
+jems_t *jems_key_object_open(jems_t *jems, const char *key);
+
+/**
+ * @brief Emit a string key followed by an open array.
+ */
+jems_t *jems_key_array_open(jems_t *jems, const char *key);
+
+/**
+ * @brief Emit a string key followed by a number.
+ *
+ * Note: if value can be exactly represented as an integer, this is equivalent
+ * to jems_key_integer(jems, key, value);
+ */
+jems_t *jems_key_number(jems_t *jems, const char *key, double value);
+
+/**
+ * @brief Emit a string key followed by an integer.
+ */
+jems_t *jems_key_integer(jems_t *jems, const char *key, int64_t value);
+
+/**
+ * @brief Emit a string key followed by a string, quoting as needed.
+ */
+jems_t *jems_key_string(jems_t *jems, const char *key, const char *string);
+
+/**
+ * @brief Emit a string key followed by a string of bytes in JSON string format.
+ */
+jems_t *jems_key_bytes(jems_t *jems, const char *key, const uint8_t *bytes, size_t length);
+
+/**
+ * @brief Emit a string key followed by boolean (true or false).
+ */
+jems_t *jems_key_bool(jems_t *jems, const char *key, bool boolean);
+
+/**
+ * @brief Emit a string key followed by a JSON true value.
+ */
+jems_t *jems_key_true(jems_t *jems, const char *key);
+
+/**
+ * @brief Emit a string key followed by a JSON false value.
+ */
+jems_t *jems_key_false(jems_t *jems, const char *key);
+
+/**
+ * @brief Emit a string key followed by a JSON null value.
+ */
+jems_t *jems_key_null(jems_t *jems, const char *key);
 
 /**
  * @brief Return the current expression depth.
