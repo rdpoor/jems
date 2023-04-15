@@ -45,7 +45,19 @@ gcc -g -Wall -I.. -o test_jems test_jems.c ../jems.c && ./test_jems && rm ./test
 // Private types and definitions
 
 #define MAX_LEVEL 10
-#define TEST_STRING_LENGTH 100
+#define TEST_STRING_LENGTH 120
+
+#define PI_100                                                                 \
+  "3.1415926535"                                                               \
+  "8979323846"                                                                 \
+  "2643383279"                                                                 \
+  "5028841971"                                                                 \
+  "6939937510"                                                                 \
+  "5820974944"                                                                 \
+  "5923078164"                                                                 \
+  "0628620899"                                                                 \
+  "8628034825"                                                                 \
+  "3421170679"
 
 #define ASSERT(e) assert(e, #e, __FILE__, __LINE__)
 
@@ -166,6 +178,10 @@ int main(void) {
     ASSERT(jems_item_count(&s_jems) == 1);
     ASSERT(test_result("null"));
 
+    test_reset();
+    jems_literal(&s_jems, PI_100, strlen(PI_100));
+    ASSERT(test_result(PI_100));
+
     // Test string escaping (tip of the hat to Latex95)
     test_reset();
     jems_string(&s_jems, "say \"hey\"!");
@@ -256,6 +272,12 @@ int main(void) {
     jems_key_null(&s_jems, "key");
     jems_object_close(&s_jems);
     ASSERT(test_result("{\"key\":null}"));
+
+    test_reset();
+    jems_object_open(&s_jems);
+    jems_key_literal(&s_jems, "pi", PI_100, strlen(PI_100));
+    jems_object_close(&s_jems);
+    ASSERT(test_result("{\"pi\":" PI_100 "}"));
 
     test_reset();
     ASSERT(jems_curr_level(&s_jems) == 0);
