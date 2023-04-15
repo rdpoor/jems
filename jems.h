@@ -161,6 +161,11 @@ jems_t *jems_false(jems_t *jems);
 jems_t *jems_null(jems_t *jems);
 
 /**
+ * @brief Emit a literal string verbatim (no quotes)
+ */
+jems_t *jems_literal(jems_t *jems, const char *literal, size_t n_bytes);
+
+/**
  * @brief Emit a string key followed by an open object.
  */
 jems_t *jems_key_object_open(jems_t *jems, const char *key);
@@ -212,6 +217,11 @@ jems_t *jems_key_false(jems_t *jems, const char *key);
  * @brief Emit a string key followed by a JSON null value.
  */
 jems_t *jems_key_null(jems_t *jems, const char *key);
+
+/**
+ * @brief Emit a string key followed by a literal string verbatim (no quotes)
+ */
+jems_t *jems_key_literal(jems_t *jems, const char *key, const char *literal, size_t n_bytes);
 
 /**
  * @brief Return the current expression depth.
